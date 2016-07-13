@@ -1,0 +1,12 @@
+Security
+=========
+
+Security Bundles File Permissions:
+
+	On every startup, our package manager checks to see if the local security data needs to be updated. If it does, the package manager dowloads the data from the server. On every update, it writes a file, security_bundles.json, in Synaptics shared directory, /usr/local/share/synaptic/. To create and write to this file, the user needs to give the package manager permission. There are two ways of doing this. The first is to simply run Synaptic with sudo, every time. The second allows the user to run Synaptic with sudo once, and then the user can run synaptic without sudo after the first run. To do the second:
+		1. Run sudo synaptic
+		2. Enter your password
+		3. cd to where the downloaded file exists: /usr/local/share/synaptic/security_bundles.json
+		4. Change the file's permissions: chmod 0666 security_bundles.json
+		5. DONE
+	After this, the user can run synaptic without sudo and the file will be overwritten without permission problems when it updates.

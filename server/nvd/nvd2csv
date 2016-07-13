@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# this outputs to stdout.  need to redirect to file 
+# i didnt add the 200+MB of xml to svn because then everyone would hate me.  this script will not function without adding the xmls from from NVD's website to the directory nvdxmls
+
+for filename in $(ls nvdxmls); do 
+   grep -P "vuln:summary|entry id=|cvss:score" nvdxmls/$filename | sed -n "/entry/{N;s/\n/\t/;N;s/\n/\t/p;}" |  sed -E 's/ <entry id=\"|\">| +<cvss:score>|<\/cvss:score>| +<vuln:summary>|<\/vuln:summary>//g' | sed 's/\"//g'
+done
+
+
+# 3 steps to the command
+#  1. only keep the lines including either the summary, score, or entryid (cve#)
+#  2. group the lines to be: cve#   CVSS    description
+#  4. remove the final xml crud (angle brackets etc.)
+#  5. TODO fix this: currently removing quote chars from description because it is breaking ruby csv parsing
+
+#grep -P "vuln:summary|entry id=|cvss:score" nvdcve-2.0-2015.xml 
+#sed -n '/entry/{N;s/\n/\t/;N;s/\n/\t/p;}'
+#sed -E 's/ <entry id=\"|\">| +<cvss:score>|<\/cvss:score>| +<vuln:summary>|<\/vuln:summary>//g'
+

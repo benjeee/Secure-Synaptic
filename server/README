@@ -1,0 +1,47 @@
+=================
+= SERVER README =
+=================
+
+The end goal of the server is to create the security_bundles.json and then to serve it to any synaptic that requires an update.
+The json file is created by running various scripts.
+The file 'cronjob' demonstrates a standard workflow of how to run them in a way that makes sense.  Note that type2preproccessing requires ~1Gig of ram free
+
+folder/script explanations can be found below:
+
+type1
+-------
+this folder is named after the "type1 datsources" that it deals with. Type1 datasource means CSV file of the following format:  
+-------->package name, current version, vulnerability description, severity, and CVE#
+We create type1 csv's currently using the following protocol:
+    1. download security json from debian security tracker
+    2. run type1preprocessing.rb
+
+
+type2
+-------
+this folder is named after "type 2 datasources".  Type2 datasource, just like type1 datasource, means a CSV file of the following format:
+--------->package name, version_patched, previous_version, CVEs contained
+NOTE: ALL versions must be present.  not just one's with CVEs.  This is so that a proper version_ordering can be created (we don't poll apt to compare version numbers.  that would be nice improvement to how we are currently handling things)
+
+We create type2 CSVs by using the following protocol :
+    1. receive csv from jeremy krach.  He obtains the csv by processing changelogs. the csv is of the format:
+    -----> source package, list of binary packages associated with source, version, urgency, previous version, CVEs associated, comments associated
+    2. run type2preprocessing.rb
+
+nvd
+-------
+this folder contains nvs2csv and also nvxmls.  nvd2csv is a bash script that will generate a csv containing all of NVD's security data from the xml files available on their website.  It prints to stdout.  In order to make this work you need to download all of NVD's xmls manually to nvdxmls.
+
+The nvd csv is used to get cvss scores and descriptions for all of the cve's when generating the security bundles. the format for the csv is
+----->cve,cvss,description
+
+versions.csv
+-------------
+this file is used to create a version order for versions of packages. specifically in wheezy.  This was a last minute addition when we realized it was necessary. It is baked in at the last step to generate_security_bundles.rb.  It simply contains latest versions for all packages in the type2 datasource
+format:
+---->branch, pkgname, binary package name,latest version at the time of changelog csv file snapshot (type2 jeremy data)
+
+
+generate_security_bundles
+---------------------------
+this script combines type1.csv,type2.csv,nvd.csv, and versions.csv in order to finally generate the security bundles.  Exactly how it functions can be seen by opening the file

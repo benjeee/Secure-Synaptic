@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# This script may be run daily to keep the security information up to date.
+# Feel free to modify this script to fit your needs. If you want it to run periodically read up on cronjobs
+# Steps:
+# 1. Download the latest debian tracker data (DST json)
+# 2. Transform the DST json to  csv format as stated in proposal
+# 3. transform the changelog data to the stardard csv format as stated in proposal
+# 4. transform NVD xmls to csv
+# 4. Run script to combine Krach's changelog data csv with the debiantracker csv, with the nvd csv's
+# 5. symlink that to /var/www/ so that it gets served
+
+curl https://security-tracker.debian.org/tracker/data/json -o type1/debiantracker.json
+ruby type1/type1preprocessing.rb type1/debiantracker.json type1/type1.csv
+ruby type2/type2preproccessing.rb type2/final.csv type2/type2.csv # requires 1+GB Ram Free
+cd nvd
+sh nvd2csv > nvd.csv
+cd ..
+ruby generate_security_bundles.rb type1/type1.csv type2/type2.csv nvd/nvd.csv security_bundles.json
+sudo ln -s security_bundles.json /var/www/security_bundles.html
